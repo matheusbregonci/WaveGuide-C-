@@ -59,5 +59,41 @@ console.log('\n=== o realce aponta para a regiao certa? ===');
 }
 ok(Math.abs(besselJ(0, 2.4048255577)) < 1e-9, 'besselJ do JS bate com a raiz tabelada');
 
+// The cylindrical set was wrong on the page for a while: E_rho and E_phi had
+// J_n swapped with J_n-prime, the prefactors swapped with them, and TM had no
+// branch at all, so it silently rendered the TE electric equations.
+console.log('\n=== guia circular: as quatro combinacoes existem e diferem ===');
+{
+  const seen = new Map();
+  for (const [mt, fl, name] of [[0,0,'TE-E'], [0,1,'TE-H'], [1,0,'TM-E'], [1,1,'TM-H']]) {
+    const cfg = { ...BASE, geometry: 1, modeType: mt, field: fl, modeN: 1, modeM: 1 };
+    const { eqs } = buildTheory(cfg, { kc: 160.79, alpha: 0 });
+    const key = eqs.map(e => e.lhs + e.mathml).join('|');
+    ok(eqs.length === 3, name + ': 3 componentes');
+    ok(!seen.has(key), name + ': conjunto proprio (nao repete outro modo)');
+    seen.set(key, name);
+  }
+}
+{
+  // Table 3.5: the axial component and whatever comes from d/drho carry the
+  // derivative J_n-prime; anything born from d/dphi carries plain J_n AND the
+  // n/(kc^2 rho) factor.
+  const { eqs } = buildTheory({ ...BASE, geometry: 1, modeType: 0, field: 0, modeN: 1 },
+                              { kc: 160.79, alpha: 0 });
+  const Erho = eqs.find(e => e.lhs.indexOf('961') >= 0);
+  const Ephi = eqs.find(e => e.lhs.indexOf('966') >= 0);
+  const prime = t => t.indexOf('8242') >= 0;
+  ok(!prime(Erho.mathml) && Erho.mathml.indexOf('mfrac') >= 0,
+     'E_rho usa J_n (sem linha) com o fator n/(kc^2 rho)');
+  ok(prime(Ephi.mathml), 'E_phi usa J_n-prime');
+  ok(Erho.mathml.indexOf('data-term="gphi"') >= 0, 'E_rho carrega a combinacao g(phi)');
+  ok(Ephi.mathml.indexOf('data-term="fphi"') >= 0, 'E_phi carrega a combinacao f(phi)');
+}
+{
+  const { ctx } = buildTheory({ ...BASE, geometry: 1, modeN: 0, modeM: 1, field: 0 },
+                              { kc: 160.79, alpha: 0 });
+  ok(typeof factorFor(ctx, 'gphi') === 'function', 'g(phi) tem funcao de realce');
+}
+
 console.log(fail === 0 ? '\nOK: coluna de teoria consistente' : `\n${fail} FALHA(S)`);
 process.exit(fail === 0 ? 0 : 1);

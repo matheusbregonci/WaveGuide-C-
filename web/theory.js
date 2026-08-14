@@ -45,6 +45,11 @@ const F = {
   // so highlighting it would light the whole plot; below cutoff it decays and
   // that is exactly what is worth seeing.
   expz: (c, x) => (c.alpha > 0 ? Math.exp(-c.alpha * x.z) : 1),
+  // A = B = 1 in the model, so both combinations peak at sqrt(2).
+  fphi: (c, x) => Math.abs(Math.sin(c.n * Math.atan2(x.y, x.x))
+                         + Math.cos(c.n * Math.atan2(x.y, x.x))) / Math.SQRT2,
+  gphi: (c, x) => Math.abs(Math.cos(c.n * Math.atan2(x.y, x.x))
+                         - Math.sin(c.n * Math.atan2(x.y, x.x))) / Math.SQRT2,
   Jn:   (c, x) => {
     const rho = Math.hypot(x.x, x.y);
     return Math.min(1, Math.abs(besselJ(c.n, c.kc * rho)) / (c.jnMax || 1));
@@ -74,6 +79,8 @@ const NOTE = {
   cos_ny: 'Maximo nas paredes y = 0 e y = b, zero no meio.',
   expz:   'Propagacao ao longo de z. Acima do corte a amplitude nao cai; abaixo, decai como e^(-alpha z).',
   Jn:     'Perfil radial. O corte sai da raiz de Bessel: e ela que fixa k_c = p/R.',
+  fphi:   'Combinacao angular da componente AXIAL. Quem vem dela por d/drho carrega J′_n.',
+  gphi:   'Combinacao angular do que nasce de d/dphi. Vem sempre com J_n e o fator n/(k_c² rho) — por isso some quando n = 0.',
 };
 
 // ---------------------------------------------------------------------------
@@ -124,26 +131,48 @@ function rectFormulas(c) {
 
 function cylFormulas(c) {
   const A = mi('A'), j = mi('j'), beta = mi('&#946;');
+  const omega = mi('&#969;'), mu = mi('&#956;'), eps = mi('&#949;');
   const rho = mi('&#961;'), phi = mi('&#966;');
-  const Jn = term('Jn', row(sub(mi('J'), mi('n')), mo('('),
-                            sub(mi('k'), mi('c')), rho, mo(')')));
-  const Jnp = term('Jn', row(sup(sub(mi('J'), mi('n')), mo('&#8242;')), mo('('),
-                             sub(mi('k'), mi('c')), rho, mo(')')));
-  const ang = row(mi('cos'), mo('&#8289;'), mo('('), mi('n'), phi, mo(')'));
-  const ez = term('expz', sup(mi('e'), row(mo('&#8722;'), j, beta, mi('z'))));
+  const kc = sub(mi('k'), mi('c'));
+
+  const Jn  = term('Jn', row(sub(mi('J'), mi('n')), mo('&#8289;'), mo('('), kc, rho, mo(')')));
+  const Jnp = term('Jn', row(sup(sub(mi('J'), mi('n')), mo('&#8242;')),
+                             mo('&#8289;'), mo('('), kc, rho, mo(')')));
+  const ez  = term('expz', sup(mi('e'), row(mo('&#8722;'), j, beta, mi('z'))));
+
+  // The two angular combinations of Table 3.5. They are NOT interchangeable:
+  // whatever carries the axial component takes f, and anything born from
+  // d/dphi takes g -- which is why f goes with J_n' and g goes with J_n.
+  const S = row(mi('sin'), mo('&#8289;'), mo('('), mi('n'), phi, mo(')'));
+  const C = row(mi('cos'), mo('&#8289;'), mo('('), mi('n'), phi, mo(')'));
+  const fPhi = term('fphi', row(mo('('), mi('A'), S, mo('+'), mi('B'), C, mo(')')));
+  const gPhi = term('gphi', row(mo('('), mi('A'), C, mo('&#8722;'), mi('B'), S, mo(')')));
+
+  const nOverKc2rho = frac(mi('n'), row(sup(kc, mn('2')), rho));
   const eq = (lhs, body) => ({ lhs, mathml: row(...body) });
 
-  if (c.field === 1 && c.modeType === 0)
-    return [
-      eq('H_z', [A, Jn, ang, ez]),
-      eq('H_&#961;', [mo('&#8722;'), j, frac(beta, sub(mi('k'), mi('c'))), A, Jnp, ang, ez]),
-      eq('H_&#966;', [mo('&#8722;'), j, frac(row(beta, mi('n')),
-        row(kc2, rho)), A, Jn, mi('sin'), mo('('), mi('n'), phi, mo(')'), ez]),
+  if (c.modeType === 0) {                                   // ---- TE_nm ----
+    if (c.field === 1) return [
+      eq('H_z', [fPhi, Jn, ez]),
+      eq('H_&#961;', [mo('&#8722;'), j, frac(beta, kc), fPhi, Jnp, ez]),
+      eq('H_&#966;', [mo('&#8722;'), j, beta, nOverKc2rho, gPhi, Jn, ez]),
     ];
+    return [
+      eq('E_&#961;', [mo('&#8722;'), j, omega, mu, nOverKc2rho, gPhi, Jn, ez]),
+      eq('E_&#966;', [j, frac(row(omega, mu), kc), fPhi, Jnp, ez]),
+      eq('E_z', [mn('0')]),
+    ];
+  }
+                                                            // ---- TM_nm ----
+  if (c.field === 0) return [
+    eq('E_z', [fPhi, Jn, ez]),
+    eq('E_&#961;', [mo('&#8722;'), j, frac(beta, kc), fPhi, Jnp, ez]),
+    eq('E_&#966;', [mo('&#8722;'), j, beta, nOverKc2rho, gPhi, Jn, ez]),
+  ];
   return [
-    eq('E_&#961;', [mo('&#8722;'), j, frac(mi('&#969;&#956;'), sub(mi('k'), mi('c'))),
-                    A, Jnp, ang, ez]),
-    eq('E_&#966;', [j, frac(mi('&#969;&#956;'), kc2), A, Jn, ang, ez]),
+    eq('H_&#961;', [j, omega, eps, nOverKc2rho, gPhi, Jn, ez]),
+    eq('H_&#966;', [mo('&#8722;'), j, frac(row(omega, eps), kc), fPhi, Jnp, ez]),
+    eq('H_z', [mn('0')]),
   ];
 }
 
