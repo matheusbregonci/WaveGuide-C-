@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia de onda — TE/TM</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Guia de onda retangular e cilíndrica</h1>
+  <p id="status">carregando módulo…</p>
+</header>
+
+<main>
+  <aside id="panel">
+    <fieldset>
+      <legend>Geometria</legend>
+      <label>Forma
+        <select id="geometry">
+          <option value="0" selected>Retangular</option>
+          <option value="1">Cilíndrica</option>
+        </select>
+      </label>
+      <label>Estrutura
+        <select id="structure">
+          <option value="0" selected>Guia aberta</option>
+          <option value="1">Cavidade</option>
+        </select>
+      </label>
+      <div data-geom="0">
+        <label>a (mm) <input type="number" id="widthMM" value="22.86" step="0.01"></label>
+        <label>b (mm) <input type="number" id="heightMM" value="10.16" step="0.01"></label>
+      </div>
+      <div data-geom="1" hidden>
+        <label>R (mm) <input type="number" id="radiusMM" value="23.83" step="0.01"></label>
+      </div>
+      <label>d (mm) <input type="number" id="depthMM" value="300" step="1"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Modo</legend>
+      <label>Tipo
+        <select id="modeType"><option value="0" selected>TE</option><option value="1">TM</option></select>
+      </label>
+      <label>Campo
+        <select id="field"><option value="0" selected>Elétrico (V/m)</option><option value="1">Magnético (A/m)</option></select>
+      </label>
+      <label>M <input type="number" id="modeM" value="1" min="0" max="5" step="1"></label>
+      <label>N <input type="number" id="modeN" value="0" min="0" max="5" step="1"></label>
+      <label data-cavity hidden>L <input type="number" id="modeL" value="1" min="0" max="5" step="1"></label>
+      <p class="note" id="modeNote"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Operação</legend>
+      <label>f (GHz) <input type="number" id="freqGHz" value="12" step="0.1"></label>
+      <label>ε_r <input type="number" id="epsR" value="1" step="0.01" min="1"></label>
+      <label>μ_r <input type="number" id="muR" value="1" step="0.01" min="1"></label>
+      <label>Potência (W) <input type="number" id="powerW" value="1" step="0.1" min="0.001"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Visualização</legend>
+      <label>Pontos <input type="range" id="points" min="5000" max="120000" step="5000" value="40000"></label>
+      <label><input type="checkbox" id="cutaway"> Corte no octante</label>
+      <label><input type="checkbox" id="animate" checked> Animar</label>
+      <label>Corte
+        <select id="plane">
+          <option value="0" selected>XY (transversal)</option>
+          <option value="1">ZX</option>
+          <option value="2">ZY</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="streamlines"> Linhas de campo</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Resultados</legend>
+      <table id="readout"></table>
+    </fieldset>
+  </aside>
+
+  <section id="views">
+    <div class="view">
+      <canvas id="gl"></canvas>
+      <p class="caption">Intensidade 3D — arraste para orbitar, roda para zoom</p>
+    </div>
+    <div class="view">
+      <canvas id="sec"></canvas>
+      <p class="caption" id="secCaption">Corte</p>
+    </div>
+  </section>
+
+  <aside id="theory">
+    <h2 id="theoryTitle">—</h2>
+    <div id="equations"></div>
+    <p class="hint" id="termNote">Passe o mouse sobre um fator para ver que
+      regiao do corte ele controla.</p>
+    <table id="readout"></table>
+    <p class="src">Estas sao as mesmas expressoes que o solver avalia
+      (<code>TEmnModel.cpp</code>), nao uma segunda deducao.</p>
+  </aside>
+</main>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

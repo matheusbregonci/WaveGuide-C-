@@ -1,0 +1,12 @@
+/dist/*.wasm
+  Content-Type: application/wasm
+  Cache-Control: public, max-age=300, must-revalidate
+
+/dist/*.js
+  Cache-Control: public, max-age=300, must-revalidate
+
+/*.js
+  Cache-Control: public, max-age=300, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=60, must-revalidate

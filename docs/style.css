@@ -1,0 +1,113 @@
+:root {
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --ink: #1b1d22;
+  --muted: #5b6270;
+  --line: #d8dbe2;
+  --accent: #2f6fd0;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+header {
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+header p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+
+main {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 16px;
+  padding: 16px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  main { grid-template-columns: 1fr; }
+}
+
+#panel { display: grid; gap: 12px; }
+fieldset {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 10px 12px 12px;
+  margin: 0;
+}
+legend { font-weight: 600; font-size: 12px; color: var(--muted);
+         text-transform: uppercase; letter-spacing: .04em; padding: 0 4px; }
+label { display: flex; align-items: center; justify-content: space-between;
+        gap: 8px; margin: 6px 0; }
+label input[type=number], label select {
+  width: 108px; padding: 3px 6px; border: 1px solid var(--line);
+  border-radius: 5px; font: inherit; background: #fff;
+}
+label input[type=range] { width: 120px; }
+label input[type=checkbox] { margin-right: auto; }
+.note { margin: 6px 0 0; font-size: 12px; color: #b0700a; min-height: 1em; }
+
+#views { display: grid; gap: 16px; }
+.view {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
+.view canvas { width: 100%; display: block; border-radius: 4px; background: #eceef2; }
+#gl { height: 420px; }
+#sec { height: 340px; }
+.caption { margin: 8px 2px 0; font-size: 12px; color: var(--muted); }
+
+#readout { width: 100%; border-collapse: collapse; font-size: 13px; }
+#readout td { padding: 3px 0; vertical-align: baseline; }
+#readout td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+#readout tr.warn td { color: #b0700a; }
+
+/* ---- three columns: controls | views | theory ---- */
+main { grid-template-columns: 264px minmax(0, 1fr) 340px; }
+@media (max-width: 1200px) { main { grid-template-columns: 264px minmax(0, 1fr); }
+                             #theory { grid-column: 1 / -1; } }
+@media (max-width: 860px)  { main { grid-template-columns: 1fr; }
+                             #theory { grid-column: auto; } }
+
+#theory {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px 16px;
+  position: sticky;
+  top: 16px;
+}
+#theory h2 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+
+.eq {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid #eef0f4;
+  overflow-x: auto;
+}
+.eq:last-of-type { border-bottom: 0; }
+.eq .lhs { color: var(--muted); min-width: 30px; font-style: italic; }
+math { font-size: 1.05em; }
+
+/* A hoverable spatial factor. Underlined so it reads as interactive before
+   the student discovers the hover by accident. */
+.term {
+  cursor: help;
+  border-bottom: 1.5px dotted var(--accent);
+  padding: 0 1px;
+  border-radius: 2px;
+}
+.term:hover, .term.on { background: #dbe8fb; border-bottom-color: #1a4d9e; }
+
+.hint { font-size: 12px; color: var(--muted); margin: 10px 0 6px;
+        min-height: 2.6em; }
+.hint.active { color: #1a4d9e; }
+.src { font-size: 11px; color: #8b90a0; margin: 12px 0 0; line-height: 1.4; }
+.src code { background: #f0f1f4; padding: 1px 4px; border-radius: 3px; }
+#theory #readout { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }

@@ -1,0 +1,4 @@
+# microstrip 2D design (type x z w d r thick | mm; type 0=rect 1=ring)
+1 0 0 1.24 0 3 0
+0 -13.93 0 20 1.5 0 0
+0 13.93 0 20 1.5 0 0

@@ -1,0 +1,30 @@
+# ---- build output ----
+# CMake FetchContent vendors glfw/glm/imgui/eigen in here: ~150 MB of sources
+# that are re-downloaded on first configure anyway.
+build/
+build-dist/
+.cache/
+
+# ---- editor / OS ----
+*.user
+*.suo
+.vs/
+.vscode/
+# Per-user ImGui window layout. Committing it means every clone inherits
+# whoever pushed last window positions.
+imgui.ini
+
+# ---- generated ----
+graphify-out/
+waveguide_export/
+# Anything the exporter writes: a LaTeX project folder plus its pictures.
+*.gif
+/*.png
+
+# ---- reference material ----
+# Deliberately untracked. It holds third-party PDFs, including a copyrighted
+# Wiley textbook (Pozar, Microwave Engineering), plus screen recordings and
+# papers totalling ~11 MB. Redistributing those from a public repository is not
+# ours to do, and git history is unpleasant to purge after the fact.
+# Add individual files back if you own the rights to them.
+reference/
